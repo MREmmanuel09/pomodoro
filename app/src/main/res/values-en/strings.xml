@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Pomodoro</string>
+
+    <string name="phase_work">Work</string>
+    <string name="phase_short_break">Short break</string>
+    <string name="phase_long_break">Long break</string>
+    <string name="phase_ready">Ready</string>
+    <string name="break_short">Break</string>
+    <string name="break_long">Long</string>
+
+    <string name="common_back">Back</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_save">Save</string>
+    <string name="common_delete">Delete</string>
+    <string name="common_edit">Edit</string>
+
+    <string name="nav_timer">Timer</string>
+    <string name="nav_stats">Stats</string>
+    <string name="nav_plant">Plant</string>
+    <string name="nav_settings">Settings</string>
+
+    <string name="timer_manage_profiles">Manage profiles…</string>
+    <string name="timer_manage_tags">Manage tags</string>
+    <string name="timer_profile">Profile</string>
+    <string name="timer_today_goal">🍅 %1$d/%2$d today</string>
+    <string name="timer_round_number">Round: %1$d</string>
+    <string name="timer_phase_of">Phase %1$d of %2$d · %3$s</string>
+    <string name="timer_reset">Reset</string>
+    <string name="timer_skip">Skip</string>
+    <string name="timer_skip_strict">Skip (confirm)</string>
+    <string name="timer_round_done">Round completed!</string>
+    <string name="timer_new_round">New round</string>
+    <string name="timer_daily_goal">Daily goal: %1$d/%2$d pomodoros</string>
+    <string name="timer_pause">Pause</string>
+    <string name="timer_play">Start</string>
+    <string name="timer_minus_min">Subtract 1 minute</string>
+    <string name="timer_plus_min">Add 1 minute</string>
+    <string name="tag_none">No tag</string>
+
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_start">Get started</string>
+    <string name="onboarding_title_1">Pomodoro cycles</string>
+    <string name="onboarding_body_1">Work in focused blocks with short breaks. The timer advances through your profile’s phases automatically.</string>
+    <string name="onboarding_title_2">Goals and stats</string>
+    <string name="onboarding_body_2">Set a daily pomodoro goal and track your progress with 30-day charts and streaks.</string>
+    <string name="onboarding_title_3">Optional features</string>
+    <string name="onboarding_body_3">Grow a plant with your sessions, organize with tags, and enable strict mode from Settings anytime.</string>
+
+    <string name="stats_title">Stats</string>
+    <string name="stats_today">Today</string>
+    <string name="stats_focused_today">Focused today</string>
+    <string name="stats_total">Total</string>
+    <string name="stats_streak_current">🔥 Current streak: %1$d days</string>
+    <string name="stats_streak_best">Best streak: %1$d days</string>
+    <string name="stats_goal_done">Goal reached!</string>
+    <string name="stats_goal_label">Goal: %1$d</string>
+    <string name="stats_last_30_days">Last 30 days</string>
+    <string name="stats_tap_bar">Tap a bar to see the day</string>
+    <string name="stats_recent">Recent activity</string>
+    <string name="stats_sessions_close">%1$d sessions · tap to close</string>
+    <string name="stats_by_tag">By tag (30 days)</string>
+    <string name="tag_untagged">No tag</string>
+
+    <string name="plant_title">My plant</string>
+    <string name="plant_stage_seed">Seed</string>
+    <string name="plant_stage_sprout">Sprout</string>
+    <string name="plant_stage_young">Young plant</string>
+    <string name="plant_stage_flower">In bloom</string>
+    <string name="plant_stage_tree">Tree</string>
+    <string name="plant_withered">It looks wilted… Water it and complete pomodoros to recover!</string>
+    <string name="plant_health">Health</string>
+    <string name="plant_pomodoros_total">Total pomodoros</string>
+    <string name="plant_streak">Current streak</string>
+    <string name="plant_next_stage">Next stage: %1$s</string>
+    <string name="plant_pomodoros_left">%1$d pomodoros to go</string>
+    <string name="plant_max_stage">Your plant has reached full growth! 🌳</string>
+    <string name="plant_water">Water (+10 health)</string>
+    <string name="plant_watered">Already watered today</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_section_timer">Timer</string>
+    <string name="settings_daily_goal">Daily goal: %1$d pomodoros</string>
+    <string name="settings_count_up">Count up</string>
+    <string name="settings_count_up_desc">Show elapsed time instead of remaining</string>
+    <string name="settings_clock_style">Clock style</string>
+    <string name="settings_time_size">Time size</string>
+    <string name="clock_digital_large">Large digital</string>
+    <string name="clock_digital_minimal">Minimal</string>
+    <string name="clock_analog">Analog</string>
+    <string name="clock_ring">Ring</string>
+    <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_theme">Theme</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="settings_dynamic_color">Dynamic color</string>
+    <string name="settings_dynamic_color_desc">Extract colors from your wallpaper (Android 12+)</string>
+    <string name="settings_accent_palette">Accent palette</string>
+    <string name="settings_section_alerts">Alerts</string>
+    <string name="settings_cue_sound">Sound when a phase ends</string>
+    <string name="settings_vibration">Vibration</string>
+    <string name="settings_section_optional">Optional features</string>
+    <string name="settings_plant">Plant</string>
+    <string name="settings_plant_desc">Grow a plant that flourishes with your pomodoros</string>
+    <string name="settings_tags">Tags</string>
+    <string name="settings_tags_desc">Organize sessions by project</string>
+    <string name="settings_strict">Strict mode</string>
+    <string name="settings_strict_desc">Hide the skip phase button</string>
+    <string name="settings_ambient">Ambient sounds</string>
+    <string name="settings_ambient_desc">Rain, forest… while you work</string>
+    <string name="ambient_rain">Rain</string>
+    <string name="ambient_waves">Waves</string>
+    <string name="ambient_forest">Forest</string>
+    <string name="ambient_play">Play ambient sound</string>
+    <string name="ambient_pause">Pause ambient sound</string>
+    <string name="settings_section_manage">Management</string>
+    <string name="settings_profiles">Timer profiles</string>
+    <string name="settings_tags_manage">Tags</string>
+    <string name="settings_export">Export data (JSON)</string>
+    <string name="settings_import">Import data (JSON)</string>
+    <string name="export_success">Data exported</string>
+    <string name="import_success">Data imported</string>
+    <string name="import_error">The operation could not be completed</string>
+    <string name="settings_section_language">Language</string>
+    <string name="language_system">System</string>
+    <string name="language_es">Español</string>
+    <string name="language_en">English</string>
+
+    <string name="profiles_title">Profiles</string>
+    <string name="profiles_new">New profile</string>
+    <string name="profiles_delete_title">Delete profile?</string>
+    <string name="profiles_delete_body">«%1$s» will be deleted. This cannot be undone.</string>
+    <string name="profiles_summary">%1$d phases · %2$s per round</string>
+    <string name="profiles_active">Active</string>
+    <string name="profiles_duplicate">Duplicate</string>
+    <string name="profile_editor_new">New profile</string>
+    <string name="profile_editor_edit">Edit profile</string>
+    <string name="profile_name">Profile name</string>
+    <string name="profile_phases">Phases (%1$d)</string>
+    <string name="profile_round">Round: %1$s</string>
+    <string name="profile_add_work">Work</string>
+    <string name="profile_add_break">Break</string>
+    <string name="profile_add_long">Long</string>
+    <string name="profile_save">Save profile</string>
+    <string name="profile_auto">Auto</string>
+    <string name="profile_move_up">Move up</string>
+    <string name="profile_move_down">Move down</string>
+    <string name="profile_delete_phase">Delete phase</string>
+    <string name="profile_error_not_found">Profile not found</string>
+    <string name="profile_error_invalid">A name and at least one phase are required</string>
+
+    <string name="tags_title">Tags</string>
+    <string name="tags_empty_title">No tags yet</string>
+    <string name="tags_empty_body">Use tags to organize your pomodoros by project.</string>
+    <string name="tags_new">New tag</string>
+    <string name="tags_edit">Edit tag</string>
+    <string name="tags_name">Name</string>
+    <string name="tags_color">Color</string>
+    <string name="tags_delete_title">Delete tag?</string>
+    <string name="tags_delete_body">«%1$s» will be deleted. Past sessions keep their history.</string>
+    <string name="tags_create_cd">New tag</string>
+    <string name="tags_delete_cd">Delete %1$s</string>
+
+    <string name="notif_channel_phases">Timer phases</string>
+    <string name="notif_channel_phases_desc">Alerts when each work or break phase completes</string>
+    <string name="notif_channel_goals">Daily goals</string>
+    <string name="notif_channel_goals_desc">Alert when you reach your daily pomodoro goal</string>
+
+    <string name="notif_paused">Paused</string>
+    <string name="notif_round_done">Round completed</string>
+    <string name="notif_ready">Ready to start</string>
+    <string name="notif_pomodoros_today">%1$d pomodoros in this round</string>
+
+    <string name="notif_action_pause">Pause</string>
+    <string name="notif_action_resume">Resume</string>
+    <string name="notif_action_skip">Skip</string>
+    <string name="notif_action_stop">Stop</string>
+
+    <string name="notif_work_done_title">Work completed!</string>
+    <string name="notif_work_done_text">Your break is about to start</string>
+    <string name="notif_break_done_title">Break finished</string>
+    <string name="notif_break_done_text">Time to get back to work</string>
+    <string name="notif_long_break_done_title">Long break finished</string>
+    <string name="notif_phase_skipped_title">Phase skipped</string>
+    <string name="notif_phase_skipped_text">Moving on to the next phase</string>
+
+    <string name="notif_goal_title">Daily goal reached!</string>
+    <string name="notif_goal_text">You completed %1$d pomodoros today. Keep it up!</string>
+</resources>
