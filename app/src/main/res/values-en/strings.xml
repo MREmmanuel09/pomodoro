@@ -64,6 +64,7 @@
     <string name="tag_untagged">No tag</string>
 
     <string name="plant_title">My plant</string>
+    <string name="common_ok">OK</string>
     <string name="plant_stage_seed">Seed</string>
     <string name="plant_stage_sprout">Sprout</string>
     <string name="plant_stage_young">Young plant</string>
@@ -78,6 +79,9 @@
     <string name="plant_max_stage">Your plant has reached full growth! 🌳</string>
     <string name="plant_water">Water (+10 health)</string>
     <string name="plant_watered">Already watered today</string>
+    <string name="plant_help">How does it work?</string>
+    <string name="plant_help_title">How the plant works</string>
+    <string name="plant_help_body">• Each completed pomodoro: +5 health and counts toward growth.\n• Stages: Seed → Sprout (5) → Young (15) → In bloom (40) → Tree (100 pomodoros).\n• Watering: +10 health, once per day.\n• If a full day passes without completing any pomodoro: −15 health (wither).\n• The stage never decreases; health bottoms at 0 and can recover to 100 with care.\n• Wither is checked when you open the app or finish a pomodoro.</string>
 
     <string name="settings_title">Settings</string>
     <string name="settings_section_timer">Timer</string>

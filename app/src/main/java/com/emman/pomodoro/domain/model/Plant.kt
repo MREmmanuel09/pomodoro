@@ -1,5 +1,8 @@
 package com.emman.pomodoro.domain.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 enum class PlantStage {
     SEED,
     SPROUT,
@@ -11,6 +14,7 @@ enum class PlantStage {
         get() = entries.getOrElse(ordinal + 1) { this }
 }
 
+@Serializable
 data class PlantState(
     val stage: PlantStage = PlantStage.SEED,
     val health: Int = 100,

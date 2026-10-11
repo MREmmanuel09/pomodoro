@@ -3,6 +3,8 @@ package com.emman.pomodoro.data.export
 import com.emman.pomodoro.domain.model.AppSettings
 import com.emman.pomodoro.domain.model.Phase
 import com.emman.pomodoro.domain.model.PhaseType
+import com.emman.pomodoro.domain.model.PlantStage
+import com.emman.pomodoro.domain.model.PlantState
 import com.emman.pomodoro.domain.model.ThemeMode
 import com.emman.pomodoro.domain.model.TimerProfile
 import kotlinx.serialization.json.Json
@@ -67,5 +69,20 @@ class ExportModelsTest {
         val decoded = json.decodeFromString(ExportEnvelope.serializer(), raw)
         assertEquals(1, decoded.version)
         assertEquals(0, decoded.profiles.size)
+    }
+
+    @Test
+    fun plantState_roundTrip() {
+        val plant = PlantState(
+            stage = PlantStage.FLOWER,
+            health = 75,
+            totalPomodoros = 42,
+            lastProgressAtEpochMs = 1000L,
+            lastWitherAtEpochMs = 2000L,
+            lastWateredAtEpochMs = 3000L
+        )
+        val encoded = json.encodeToString(PlantState.serializer(), plant)
+        val decoded = json.decodeFromString(PlantState.serializer(), encoded)
+        assertEquals(plant, decoded)
     }
 }

@@ -64,6 +64,7 @@
     <string name="tag_untagged">Sin etiqueta</string>
 
     <string name="plant_title">Mi planta</string>
+    <string name="common_ok">Aceptar</string>
     <string name="plant_stage_seed">Semilla</string>
     <string name="plant_stage_sprout">Brote</string>
     <string name="plant_stage_young">Planta joven</string>
@@ -78,6 +79,9 @@
     <string name="plant_max_stage">¡Tu planta ha crecido al máximo! 🌳</string>
     <string name="plant_water">Regar (+10 salud)</string>
     <string name="plant_watered">Ya regada hoy</string>
+    <string name="plant_help">¿Cómo funciona?</string>
+    <string name="plant_help_title">Cómo funciona la planta</string>
+    <string name="plant_help_body">• Cada pomodoro completado: +5 de salud y cuenta para su crecimiento.\n• Etapas: Semilla → Brote (5) → Joven (15) → En flor (40) → Árbol (100 pomodoros).\n• Regar: +10 de salud, una vez al día.\n• Si un día completo pasa sin completar ni un pomodoro: −15 de salud (marchitez).\n• La etapa nunca baja; la salud llega hasta 0 y con cuidado vuelve a 100.\n• La marchitez se evalúa al abrir la app o al terminar un pomodoro.</string>
 
     <string name="settings_title">Ajustes</string>
     <string name="settings_section_timer">Temporizador</string>

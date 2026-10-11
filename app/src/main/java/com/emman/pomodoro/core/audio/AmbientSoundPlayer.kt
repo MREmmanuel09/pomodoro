@@ -3,8 +3,12 @@ package com.emman.pomodoro.core.audio
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import java.util.Random
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -25,12 +29,14 @@ enum class AmbientSound(val id: String) {
 @Singleton
 class AmbientSoundPlayer @Inject constructor() {
 
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var track: AudioTrack? = null
+    private var writeJob: Job? = null
     private var playingSound: AmbientSound? = null
 
     val isPlaying: Boolean get() = playingSound != null
 
-    suspend fun play(sound: AmbientSound) = withContext(Dispatchers.IO) {
+    suspend fun play(sound: AmbientSound) {
         stop()
         val pcm = when (sound) {
             AmbientSound.RAIN -> synthesizeRain()
@@ -57,17 +63,32 @@ class AmbientSoundPlayer @Inject constructor() {
                     .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
                     .build()
             )
-            .setBufferSizeInBytes(maxOf(minBuf, pcm.size * 2))
-            .setTransferMode(AudioTrack.MODE_STATIC)
+            .setBufferSizeInBytes(maxOf(minBuf, 8192))
+            .setTransferMode(AudioTrack.MODE_STREAM)
             .build()
-        audioTrack.write(pcm, 0, pcm.size)
-        audioTrack.setLoopPoints(0, pcm.size, -1)
+        if (audioTrack.state != AudioTrack.STATE_INITIALIZED) {
+            audioTrack.release()
+            return
+        }
+        audioTrack.setVolume(1.0f)
         audioTrack.play()
         track = audioTrack
         playingSound = sound
+        writeJob = scope.launch {
+            try {
+                while (isActive) {
+                    val written = audioTrack.write(pcm, 0, pcm.size)
+                    if (written < 0) break
+                }
+            } finally {
+                runCatching { audioTrack.stop() }
+            }
+        }
     }
 
     fun stop() {
+        writeJob?.cancel()
+        writeJob = null
         track?.let {
             runCatching {
                 it.stop()
@@ -80,22 +101,22 @@ class AmbientSoundPlayer @Inject constructor() {
 
     private fun synthesizeRain(): ShortArray {
         val sampleRate = 22050
-        val seconds = 8
+        val seconds = 6
         val samples = sampleRate * seconds
         val pcm = ShortArray(samples)
         val random = Random(42)
         var previous = 0.0
         for (i in 0 until samples) {
             val white = random.nextDouble(-1.0, 1.0)
-            previous = previous * 0.85 + white * 0.15
-            pcm[i] = (previous * Short.MAX_VALUE * 0.35).toInt().toShort()
+            previous = previous * 0.7 + white * 0.3
+            pcm[i] = (previous * Short.MAX_VALUE * 0.55).toInt().toShort()
         }
         return pcm
     }
 
     private fun synthesizeWaves(): ShortArray {
         val sampleRate = 22050
-        val seconds = 12
+        val seconds = 10
         val samples = sampleRate * seconds
         val pcm = ShortArray(samples)
         val random = Random(7)
@@ -105,7 +126,7 @@ class AmbientSoundPlayer @Inject constructor() {
             previous = previous * 0.9 + white * 0.1
             val time = i.toDouble() / sampleRate
             val lfo = 0.35 + 0.65 * (0.5 + 0.5 * sin(2.0 * PI * time / 8.0))
-            pcm[i] = (previous * lfo * Short.MAX_VALUE * 0.5).toInt().toShort()
+            pcm[i] = (previous * lfo * Short.MAX_VALUE * 0.7).toInt().toShort()
         }
         return pcm
     }
@@ -120,13 +141,13 @@ class AmbientSoundPlayer @Inject constructor() {
         for (i in 0 until samples) {
             val white = random.nextDouble(-1.0, 1.0)
             background = background * 0.97 + white * 0.03
-            pcm[i] = (background * Short.MAX_VALUE * 0.15).toInt().toShort()
+            pcm[i] = (background * Short.MAX_VALUE * 0.3).toInt().toShort()
         }
         var t = random.nextInt(sampleRate, sampleRate * 2)
         while (t < samples - sampleRate / 2) {
             val chirpFreq = 1800.0 + random.nextDouble(0.0, 1200.0)
             val chirpLen = sampleRate / 20 + random.nextInt(sampleRate / 20)
-            val amplitude = Short.MAX_VALUE * 0.25
+            val amplitude = Short.MAX_VALUE * 0.35
             for (j in 0 until chirpLen) {
                 val index = t + j
                 if (index >= samples) break
