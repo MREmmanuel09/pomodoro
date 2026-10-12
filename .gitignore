@@ -16,3 +16,4 @@ local.properties
 !debug.keystore
 keystore.properties
 /*.png
+/Sonidos/

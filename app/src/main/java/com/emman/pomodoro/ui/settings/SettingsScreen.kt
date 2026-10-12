@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -34,11 +35,14 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -75,6 +79,7 @@ fun SettingsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    var showCredits by remember { mutableStateOf(false) }
     val exportMessage = stringResource(R.string.export_success)
     val importMessage = stringResource(R.string.import_success)
     val importErrorMessage = stringResource(R.string.import_error)
@@ -289,6 +294,10 @@ fun SettingsScreen(
                             importLauncher.launch(arrayOf("application/json", "text/plain", "*/*"))
                         }
                     )
+                    NavRow(
+                        title = stringResource(R.string.settings_sound_credits),
+                        onClick = { showCredits = true }
+                    )
                 }
             }
 
@@ -305,6 +314,19 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
         }
+    }
+
+    if (showCredits) {
+        AlertDialog(
+            onDismissRequest = { showCredits = false },
+            title = { Text(stringResource(R.string.settings_sound_credits)) },
+            text = { Text(stringResource(R.string.sound_credits_message)) },
+            confirmButton = {
+                TextButton(onClick = { showCredits = false }) {
+                    Text(stringResource(R.string.settings_close))
+                }
+            }
+        )
     }
 }
 

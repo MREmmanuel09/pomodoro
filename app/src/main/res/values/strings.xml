@@ -124,6 +124,9 @@
     <string name="settings_tags_manage">Etiquetas</string>
     <string name="settings_export">Exportar datos (JSON)</string>
     <string name="settings_import">Importar datos (JSON)</string>
+    <string name="settings_sound_credits">Créditos de sonidos</string>
+    <string name="settings_close">Cerrar</string>
+    <string name="sound_credits_message">Sonidos ambientales de Pixabay:\n\n• Lluvia — Franco Gonzalez\n• Olas — Stereogenic Studio\n• Bosque — Paweł Spychała\n\nBajo la Content License de Pixabay. Crédito agradecido a los autores en pixabay.com.</string>
     <string name="export_success">Datos exportados</string>
     <string name="import_success">Datos importados</string>
     <string name="import_error">No se pudo completar la operación</string>

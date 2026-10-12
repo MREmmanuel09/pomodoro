@@ -72,6 +72,14 @@ Si después de lo anterior sigue fallando:
 
 Abre el proyecto en Android Studio (Ladybug o superior) y usa Run ▶.
 
+## Agradecimientos
+
+Los sonidos ambientales (lluvia, olas y bosque) provienen de [Pixabay](https://pixabay.com/) bajo su Content License:
+
+- Lluvia — Franco Gonzalez
+- Olas — Stereogenic Studio
+- Bosque — Paweł Spychała
+
 ## Licencia
 
 [MIT](LICENSE) © MREmmanuel09
