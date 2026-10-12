@@ -1,5 +1,6 @@
 package com.emman.pomodoro.ui.settings
 
+import android.app.Activity
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -292,12 +293,13 @@ fun SettingsScreen(
             }
 
             SectionCard(title = stringResource(R.string.settings_section_language)) {
+                val activity = LocalContext.current as? Activity
                 EnumChips(
                     options = AppLanguage.entries,
                     selected = settings.language,
                     label = { Text(stringResource(languageLabelRes(it))) }
                 ) { option ->
-                    viewModel.update { it.copy(language = option) }
+                    viewModel.setLanguage(option) { activity?.recreate() }
                 }
             }
 

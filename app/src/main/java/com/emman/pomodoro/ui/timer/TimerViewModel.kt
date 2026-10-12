@@ -1,9 +1,8 @@
 package com.emman.pomodoro.ui.timer
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.emman.pomodoro.core.notification.TimerService
+import com.emman.pomodoro.core.notification.TimerServiceController
 import com.emman.pomodoro.core.timing.TimerEngine
 import com.emman.pomodoro.domain.model.Tag
 import com.emman.pomodoro.domain.model.ClockStyle
@@ -16,7 +15,6 @@ import com.emman.pomodoro.domain.repository.SessionRepository
 import com.emman.pomodoro.domain.repository.SettingsRepository
 import com.emman.pomodoro.domain.repository.TagRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -47,7 +45,7 @@ class TimerViewModel @Inject constructor(
     profileRepository: ProfileRepository,
     tagRepository: TagRepository,
     private val sessionRepository: SessionRepository,
-    @param:ApplicationContext private val appContext: Context
+    private val timerServiceController: TimerServiceController
 ) : ViewModel() {
 
     private val completedToday = MutableStateFlow(0)
@@ -63,16 +61,14 @@ class TimerViewModel @Inject constructor(
             ?: profiles.firstOrNull()
             ?: TimerProfile.classic()
 
-        if (state.profile.id != activeProfile.id && state.status == TimerStatus.IDLE) {
-            engine.loadProfile(activeProfile)
+        val displayState = if (state.status == TimerStatus.IDLE && state.profile.id != activeProfile.id) {
+            state.copy(profile = activeProfile)
+        } else {
+            state
         }
 
         TimerUiState(
-            timerState = if (state.profile.id == activeProfile.id) {
-                state
-            } else {
-                state.copy(profile = activeProfile)
-            },
+            timerState = displayState,
             profiles = profiles,
             activeProfile = activeProfile,
             completedToday = doneToday,
@@ -102,12 +98,12 @@ class TimerViewModel @Inject constructor(
         when (uiState.value.timerState.status) {
             TimerStatus.IDLE, TimerStatus.FINISHED -> {
                 engine.start()
-                TimerService.start(appContext)
+                timerServiceController.start()
             }
             TimerStatus.RUNNING -> engine.pause()
             TimerStatus.PAUSED -> {
                 engine.resume()
-                TimerService.start(appContext)
+                timerServiceController.start()
             }
         }
     }
@@ -123,6 +119,10 @@ class TimerViewModel @Inject constructor(
         viewModelScope.launch {
             settingsRepository.update { it.copy(activeProfileId = profileId) }
         }
+    }
+
+    fun loadActiveProfile(profile: TimerProfile) {
+        engine.loadProfile(profile)
     }
 
     fun setTag(tagId: Long?) = engine.setTag(tagId)

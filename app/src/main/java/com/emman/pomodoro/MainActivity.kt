@@ -19,30 +19,19 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
-import com.emman.pomodoro.domain.model.AppSettings
+import com.emman.pomodoro.core.util.LanguageCache
 import com.emman.pomodoro.domain.model.AppLanguage
+import com.emman.pomodoro.domain.model.AppSettings
 import com.emman.pomodoro.domain.repository.SettingsRepository
 import com.emman.pomodoro.ui.navigation.PomodoroNavGraph
 import com.emman.pomodoro.ui.theme.PomodoroTheme
-import dagger.hilt.EntryPoint
-import dagger.hilt.InstallIn
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.EntryPointAccessors
-import dagger.hilt.components.SingletonComponent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.runBlocking
 import java.util.Locale
 import javax.inject.Inject
-
-@EntryPoint
-@InstallIn(SingletonComponent::class)
-interface LocaleEntryPoint {
-    fun settingsRepository(): SettingsRepository
-}
 
 @HiltViewModel
 class ThemeViewModel @Inject constructor(
@@ -85,15 +74,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun wrapLocale(base: Context): Context {
-        val appContext = base.applicationContext
-        val language = runCatching {
-            val entryPoint = EntryPointAccessors.fromApplication(
-                appContext,
-                LocaleEntryPoint::class.java
-            )
-            runBlocking { entryPoint.settingsRepository().settings.first().language }
-        }.getOrNull() ?: AppLanguage.SYSTEM
-
+        val language = LanguageCache.read(base) ?: AppLanguage.SYSTEM
         val locale = when (language) {
             AppLanguage.ES -> Locale.forLanguageTag("es")
             AppLanguage.EN -> Locale.ENGLISH

@@ -79,4 +79,49 @@ class PlantRulesTest {
         assertEquals(0L, PlantRules.daysSince(0L, now))
         assertEquals(2L, PlantRules.daysSince(now - DAY_MS * 2 - 3600_000, now))
     }
+
+    @Test
+    fun stageForPomodoros_exactBoundaries() {
+        assertEquals(PlantStage.SEED, PlantRules.stageForPomodoros(4))
+        assertEquals(PlantStage.SPROUT, PlantRules.stageForPomodoros(5))
+        assertEquals(PlantStage.SPROUT, PlantRules.stageForPomodoros(14))
+        assertEquals(PlantStage.YOUNG, PlantRules.stageForPomodoros(15))
+        assertEquals(PlantStage.YOUNG, PlantRules.stageForPomodoros(39))
+        assertEquals(PlantStage.FLOWER, PlantRules.stageForPomodoros(40))
+        assertEquals(PlantStage.FLOWER, PlantRules.stageForPomodoros(99))
+        assertEquals(PlantStage.TREE, PlantRules.stageForPomodoros(100))
+    }
+
+    @Test
+    fun pomodorosToNextStage_boundaries() {
+        assertEquals(1, PlantRules.pomodorosToNextStage(4))
+        assertEquals(10, PlantRules.pomodorosToNextStage(5))
+        assertEquals(1, PlantRules.pomodorosToNextStage(14))
+        assertEquals(1, PlantRules.pomodorosToNextStage(99))
+        assertNull(PlantRules.pomodorosToNextStage(100))
+    }
+
+    @Test
+    fun heal_cappedAtMaxAndFullHealthStays() {
+        assertEquals(100, PlantRules.healOnPomodoro(100))
+        assertEquals(100, PlantRules.healOnWater(100))
+        assertEquals(100, PlantRules.healOnWater(93))
+    }
+
+    @Test
+    fun wither_neverBelowZero() {
+        assertEquals(0, PlantRules.wither(0))
+        assertEquals(0, PlantRules.wither(5))
+    }
+
+    @Test
+    fun canWater_justUnderOneDay() {
+        assertFalse(PlantRules.canWater(now - DAY_MS + 1000, now))
+        assertTrue(PlantRules.canWater(now - DAY_MS, now))
+    }
+
+    @Test
+    fun shouldWither_firstMissedDayAfterLongBreak() {
+        assertTrue(PlantRules.shouldWither(now - DAY_MS - 1000, 0L, now))
+    }
 }

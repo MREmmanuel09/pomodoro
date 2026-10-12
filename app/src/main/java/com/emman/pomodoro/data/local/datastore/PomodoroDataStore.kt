@@ -16,8 +16,10 @@ import com.emman.pomodoro.domain.model.PlantStage
 import com.emman.pomodoro.domain.model.PlantState
 import com.emman.pomodoro.domain.model.ThemeMode
 import com.emman.pomodoro.domain.model.TimerProfile
+import com.emman.pomodoro.domain.model.TimerSnapshot
 import com.emman.pomodoro.domain.model.TimerTextScale
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -53,6 +55,7 @@ class PomodoroDataStore @Inject constructor(
         val LANGUAGE = stringPreferencesKey("language")
         val PROFILES_JSON = stringPreferencesKey("profiles_json")
         val PLANT_JSON = stringPreferencesKey("plant_json")
+        val TIMER_SNAPSHOT_JSON = stringPreferencesKey("timer_snapshot_json")
         val ONBOARDING_DONE = booleanPreferencesKey("onboarding_done")
     }
 
@@ -86,6 +89,25 @@ class PomodoroDataStore @Inject constructor(
     suspend fun savePlant(state: PlantState) {
         dataStore.edit { prefs ->
             prefs[Keys.PLANT_JSON] = json.encodeToString(state)
+        }
+    }
+
+    suspend fun saveTimerSnapshot(snapshot: TimerSnapshot) {
+        dataStore.edit { prefs ->
+            prefs[Keys.TIMER_SNAPSHOT_JSON] = json.encodeToString(snapshot)
+        }
+    }
+
+    suspend fun clearTimerSnapshot() {
+        dataStore.edit { prefs ->
+            prefs.remove(Keys.TIMER_SNAPSHOT_JSON)
+        }
+    }
+
+    suspend fun loadTimerSnapshot(): TimerSnapshot? {
+        val raw = dataStore.data.map { it[Keys.TIMER_SNAPSHOT_JSON] }.first()
+        return raw?.let {
+            runCatching { json.decodeFromString<TimerSnapshot>(it) }.getOrNull()
         }
     }
 

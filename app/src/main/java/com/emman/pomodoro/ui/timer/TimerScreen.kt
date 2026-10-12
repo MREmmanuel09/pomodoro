@@ -38,6 +38,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -79,6 +80,12 @@ fun TimerScreen(
     val phase = timer.currentPhase
     val phaseType = timer.currentPhaseType
 
+    LaunchedEffect(timer.status, timer.profile.id, state.activeProfile.id) {
+        if (timer.status == TimerStatus.IDLE && timer.profile.id != state.activeProfile.id) {
+            viewModel.loadActiveProfile(state.activeProfile)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -89,6 +96,7 @@ fun TimerScreen(
         ProfileSelector(
             profiles = state.profiles,
             activeProfileId = state.activeProfile.id,
+            enabled = timer.status == TimerStatus.IDLE,
             onSelect = viewModel::selectProfile,
             onManage = onManageProfiles
         )
@@ -274,6 +282,7 @@ fun TimerScreen(
 private fun ProfileSelector(
     profiles: List<TimerProfile>,
     activeProfileId: String,
+    enabled: Boolean,
     onSelect: (String) -> Unit,
     onManage: () -> Unit
 ) {
@@ -281,7 +290,7 @@ private fun ProfileSelector(
     val active = profiles.find { it.id == activeProfileId } ?: profiles.firstOrNull()
 
     Box {
-        OutlinedButton(onClick = { expanded = true }) {
+        OutlinedButton(onClick = { expanded = true }, enabled = enabled) {
             Text(active?.name ?: stringResource(R.string.timer_profile))
             Icon(Icons.Default.ArrowDropDown, contentDescription = null)
         }

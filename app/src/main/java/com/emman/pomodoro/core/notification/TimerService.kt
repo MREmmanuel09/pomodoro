@@ -17,8 +17,10 @@ import com.emman.pomodoro.domain.model.Session
 import com.emman.pomodoro.domain.model.SessionStatus
 import com.emman.pomodoro.domain.model.TimerStatus
 import com.emman.pomodoro.domain.repository.PlantRepository
+import com.emman.pomodoro.domain.repository.ProfileRepository
 import com.emman.pomodoro.domain.repository.SessionRepository
 import com.emman.pomodoro.domain.repository.SettingsRepository
+import com.emman.pomodoro.domain.repository.TimerSnapshotStore
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,6 +40,8 @@ class TimerService : Service() {
     @Inject lateinit var sessionRepository: SessionRepository
     @Inject lateinit var settingsRepository: SettingsRepository
     @Inject lateinit var plantRepository: PlantRepository
+    @Inject lateinit var profileRepository: ProfileRepository
+    @Inject lateinit var snapshotStore: TimerSnapshotStore
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
@@ -47,9 +51,18 @@ class TimerService : Service() {
         super.onCreate()
         startAsForeground(engine.state.value)
         serviceScope.launch {
+            var lastKey: Pair<Int, TimerStatus>? = null
+            var sawActive = false
             engine.state.collect { state ->
-                notificationHelper.updateTimerNotification(state)
-                if (state.status == TimerStatus.IDLE) {
+                val key = state.remainingSeconds to state.status
+                if (key != lastKey) {
+                    lastKey = key
+                    notificationHelper.updateTimerNotification(state)
+                }
+                if (state.status != TimerStatus.IDLE) {
+                    sawActive = true
+                }
+                if (state.status == TimerStatus.IDLE && sawActive) {
                     stopSelf()
                 }
             }
@@ -68,8 +81,22 @@ class TimerService : Service() {
                 engine.reset()
                 stopSelf()
             }
+            null -> serviceScope.launch { restoreIfNeeded() }
         }
         return START_NOT_STICKY
+    }
+
+    private suspend fun restoreIfNeeded() {
+        if (engine.state.value.status != TimerStatus.IDLE) return
+        val snapshot = snapshotStore.load() ?: return
+        if (snapshot.status != TimerStatus.RUNNING.name) return
+        val profile = profileRepository.profiles.first()
+            .find { it.id == snapshot.profileId }
+        if (profile == null) {
+            snapshotStore.clear()
+            return
+        }
+        engine.restore(snapshot, profile)
     }
 
     private fun startAsForeground(state: com.emman.pomodoro.domain.model.TimerState) {
@@ -135,23 +162,21 @@ class TimerService : Service() {
         }
     }
 
-    private fun logSession(event: TimerEvent.PhaseCompleted) {
+    private suspend fun logSession(event: TimerEvent.PhaseCompleted) {
         val now = System.currentTimeMillis()
         val startedAt = now - event.actualDurationSec * 1000L
-        serviceScope.launch {
-            sessionRepository.logSession(
-                Session(
-                    profileId = event.profileId,
-                    phaseType = event.phase.type,
-                    plannedDurationSec = event.phase.durationSeconds,
-                    actualDurationSec = event.actualDurationSec,
-                    startedAtEpochMs = startedAt,
-                    completedAtEpochMs = now,
-                    status = event.status,
-                    tagId = event.tagId
-                )
+        sessionRepository.logSession(
+            Session(
+                profileId = event.profileId,
+                phaseType = event.phase.type,
+                plannedDurationSec = event.phase.durationSeconds,
+                actualDurationSec = event.actualDurationSec,
+                startedAtEpochMs = startedAt,
+                completedAtEpochMs = now,
+                status = event.status,
+                tagId = event.tagId
             )
-        }
+        )
     }
 
     private fun startOfTodayEpochMs(): Long =

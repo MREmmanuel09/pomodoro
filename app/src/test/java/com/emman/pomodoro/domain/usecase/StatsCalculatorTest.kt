@@ -121,4 +121,56 @@ class StatsCalculatorTest {
         assertEquals(1, detail.size)
         assertEquals(today + 3600_000, detail.first().completedAtEpochMs)
     }
+
+    @Test
+    fun dayDetail_sortedDescending() {
+        val now = System.currentTimeMillis()
+        val today = StatsCalculator.startOfDay(now)
+        val sessions = listOf(
+            session(today + 3600_000),
+            session(today + 7200_000)
+        )
+        val detail = StatsCalculator.dayDetail(sessions, today)
+        assertEquals(today + 7200_000, detail.first().completedAtEpochMs)
+    }
+
+    @Test
+    fun summarize_totalIncludesAllTimeButStreakIgnoresOld() {
+        val now = System.currentTimeMillis()
+        val sessions = listOf(session(dayStart(40) + 3600_000))
+        val summary = StatsCalculator.summarize(sessions, dailyGoal = 8, nowEpochMs = now)
+        assertEquals(1, summary.totalPomodoros)
+        assertEquals(0, summary.todayPomodoros)
+        assertEquals(0, summary.currentStreakDays)
+    }
+
+    @Test
+    fun streak_acrossDstSpringForward() {
+        val original = java.util.TimeZone.getDefault()
+        try {
+            java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("America/New_York"))
+            val cal = Calendar.getInstance().apply {
+                set(2026, Calendar.MARCH, 9, 12, 0, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            val now = cal.timeInMillis
+            val prevDay = Calendar.getInstance().apply {
+                timeInMillis = now
+                add(Calendar.DAY_OF_YEAR, -1)
+                set(Calendar.HOUR_OF_DAY, 1)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }.timeInMillis
+            val sessions = listOf(
+                session(StatsCalculator.startOfDay(now) + 3600_000),
+                session(prevDay)
+            )
+            val summary = StatsCalculator.summarize(sessions, dailyGoal = 8, nowEpochMs = now)
+            assertEquals(2, summary.currentStreakDays)
+            assertEquals(2, summary.bestStreakDays)
+        } finally {
+            java.util.TimeZone.setDefault(original)
+        }
+    }
 }

@@ -71,10 +71,10 @@ object StatsCalculator {
 
     private fun currentStreak(activeDays: Set<Long>, todayStart: Long): Int {
         var streak = 0
-        var cursor = if (activeDays.contains(todayStart)) todayStart else todayStart - DAY_MS
+        var cursor = if (activeDays.contains(todayStart)) todayStart else addDays(todayStart, -1)
         while (activeDays.contains(cursor)) {
             streak++
-            cursor -= DAY_MS
+            cursor = addDays(cursor, -1)
         }
         return streak
     }
@@ -85,7 +85,7 @@ object StatsCalculator {
         var best = 1
         var current = 1
         for (i in 1 until sorted.size) {
-            current = if (sorted[i] - sorted[i - 1] == DAY_MS) {
+            current = if (addDays(sorted[i - 1], 1) == sorted[i]) {
                 current + 1
             } else {
                 1
@@ -94,4 +94,10 @@ object StatsCalculator {
         }
         return best
     }
+
+    private fun addDays(epochMs: Long, days: Int): Long =
+        Calendar.getInstance().apply {
+            timeInMillis = epochMs
+            add(Calendar.DAY_OF_YEAR, days)
+        }.timeInMillis
 }

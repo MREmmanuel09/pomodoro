@@ -4,8 +4,10 @@ import com.emman.pomodoro.domain.model.Phase
 import com.emman.pomodoro.domain.model.PhaseType
 import com.emman.pomodoro.domain.model.SessionStatus
 import com.emman.pomodoro.domain.model.TimerProfile
+import com.emman.pomodoro.domain.model.TimerSnapshot
 import com.emman.pomodoro.domain.model.TimerState
 import com.emman.pomodoro.domain.model.TimerStatus
+import com.emman.pomodoro.domain.repository.TimerSnapshotStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -24,7 +26,8 @@ import javax.inject.Singleton
 @Singleton
 class TimerEngine @Inject constructor(
     private val ticker: Ticker,
-    @param:ApplicationScope private val scope: CoroutineScope
+    @param:ApplicationScope private val scope: CoroutineScope,
+    private val snapshotStore: TimerSnapshotStore
 ) {
     private val _state = MutableStateFlow(TimerState())
     val state: StateFlow<TimerState> = _state.asStateFlow()
@@ -37,7 +40,7 @@ class TimerEngine @Inject constructor(
 
     private var tickJob: Job? = null
 
-    private var actualElapsedInPhase: Int = 0
+    private var adjustTotalSeconds: Int = 0
     private var phaseStartedAtMs: Long = 0
 
     fun loadProfile(profile: TimerProfile) {
@@ -57,6 +60,7 @@ class TimerEngine @Inject constructor(
 
     fun setTag(tagId: Long?) {
         _state.update { it.copy(activeTagId = tagId) }
+        persistSnapshot()
     }
 
     fun start() {
@@ -64,6 +68,10 @@ class TimerEngine @Inject constructor(
         when (s.status) {
             TimerStatus.IDLE -> beginPhase(s.phaseIndex, s.profile)
             TimerStatus.PAUSED -> resume()
+            TimerStatus.FINISHED -> {
+                _state.update { it.copy(pomodorosCompletedInRound = 0) }
+                beginPhase(0, s.profile)
+            }
             else -> Unit
         }
     }
@@ -81,6 +89,7 @@ class TimerEngine @Inject constructor(
                 phaseEndsAtEpochMs = null
             )
         }
+        persistSnapshot()
     }
 
     fun resume() {
@@ -111,6 +120,7 @@ class TimerEngine @Inject constructor(
                 sessionStartedAtEpochMs = null
             )
         }
+        scope.launch { snapshotStore.clear() }
     }
 
     fun adjust(deltaSeconds: Int) {
@@ -124,15 +134,70 @@ class TimerEngine @Inject constructor(
         val newRemaining = (currentRemaining + deltaSeconds).coerceAtLeast(0)
         if (s.status == TimerStatus.RUNNING) {
             val newEnd = ticker.nowMs() + newRemaining * 1000L
-            actualElapsedInPhase = (actualElapsedInPhase + deltaSeconds).coerceAtLeast(0)
+            adjustTotalSeconds += deltaSeconds
             _state.update {
                 it.copy(remainingSeconds = newRemaining, phaseEndsAtEpochMs = newEnd)
             }
             if (newRemaining == 0) {
                 completePhase(status = SessionStatus.COMPLETED)
+            } else {
+                persistSnapshot()
             }
         } else {
             _state.update { it.copy(remainingSeconds = newRemaining) }
+            persistSnapshot()
+        }
+    }
+
+    fun restore(snapshot: TimerSnapshot, profile: TimerProfile) {
+        if (_state.value.status != TimerStatus.IDLE) return
+        val status = runCatching { TimerStatus.valueOf(snapshot.status) }.getOrNull() ?: return
+        if (status != TimerStatus.RUNNING && status != TimerStatus.PAUSED) return
+        if (snapshot.savedAtNowMs > 0L && snapshot.savedAtWallClockMs > 0L) {
+            val monoDelta = ticker.nowMs() - snapshot.savedAtNowMs
+            val wallDelta = System.currentTimeMillis() - snapshot.savedAtWallClockMs
+            if (kotlin.math.abs(wallDelta - monoDelta) > REBOOT_TOLERANCE_MS) {
+                scope.launch { snapshotStore.clear() }
+                return
+            }
+        }
+        resetInternal()
+        adjustTotalSeconds = snapshot.adjustTotalSeconds
+        when (status) {
+            TimerStatus.RUNNING -> {
+                val end = snapshot.phaseEndsAtEpochMs ?: return
+                _state.update {
+                    it.copy(
+                        profile = profile,
+                        phaseIndex = snapshot.phaseIndex,
+                        status = TimerStatus.RUNNING,
+                        remainingSeconds = ((end - ticker.nowMs()) / 1000).toInt().coerceAtLeast(0),
+                        totalSecondsInPhase = snapshot.totalSecondsInPhase,
+                        phaseEndsAtEpochMs = end,
+                        pomodorosCompletedInRound = snapshot.pomodorosCompletedInRound,
+                        activeTagId = snapshot.activeTagId,
+                        sessionStartedAtEpochMs = snapshot.sessionStartedAtEpochMs
+                    )
+                }
+                startTickerLoop()
+            }
+            TimerStatus.PAUSED -> {
+                _state.update {
+                    it.copy(
+                        profile = profile,
+                        phaseIndex = snapshot.phaseIndex,
+                        status = TimerStatus.PAUSED,
+                        remainingSeconds = snapshot.remainingSeconds,
+                        totalSecondsInPhase = snapshot.totalSecondsInPhase,
+                        phaseEndsAtEpochMs = null,
+                        pomodorosCompletedInRound = snapshot.pomodorosCompletedInRound,
+                        activeTagId = snapshot.activeTagId,
+                        sessionStartedAtEpochMs = snapshot.sessionStartedAtEpochMs
+                    )
+                }
+                persistSnapshot()
+            }
+            else -> Unit
         }
     }
 
@@ -141,6 +206,7 @@ class TimerEngine @Inject constructor(
             _state.update { it.copy(status = TimerStatus.FINISHED) }
             return
         }
+        adjustTotalSeconds = 0
         beginPhaseFromRemaining(index, profile, phase.durationSeconds)
     }
 
@@ -148,7 +214,6 @@ class TimerEngine @Inject constructor(
         val phase = profile.phases.getOrNull(index) ?: return
         val now = ticker.nowMs()
         phaseStartedAtMs = now
-        actualElapsedInPhase = phase.durationSeconds - remainingSeconds
         val endAt = now + remainingSeconds * 1000L
         _state.update {
             it.copy(
@@ -160,6 +225,7 @@ class TimerEngine @Inject constructor(
                 sessionStartedAtEpochMs = it.sessionStartedAtEpochMs ?: now
             )
         }
+        persistSnapshot()
         startTickerLoop()
     }
 
@@ -191,10 +257,9 @@ class TimerEngine @Inject constructor(
         stopTickerLoop()
         val s = _state.value
         val phase = s.profile.phases.getOrNull(s.phaseIndex) ?: return
-        val actualSec = when (status) {
-            SessionStatus.COMPLETED -> phase.durationSeconds
-            else -> (phase.durationSeconds - s.remainingSeconds).coerceAtLeast(0)
-        }
+        val remainingAtEvent = if (status == SessionStatus.COMPLETED) 0 else s.remainingSeconds
+        val actualSec = (phase.durationSeconds + adjustTotalSeconds - remainingAtEvent)
+            .coerceAtLeast(0)
         val newPomodoros = if (phase.type == PhaseType.WORK) {
             s.pomodorosCompletedInRound + 1
         } else {
@@ -204,7 +269,7 @@ class TimerEngine @Inject constructor(
             TimerEvent.PhaseCompleted(
                 phase = phase,
                 status = status,
-                actualDurationSec = if (status == SessionStatus.COMPLETED) phase.durationSeconds else actualSec,
+                actualDurationSec = actualSec,
                 profileId = s.profile.id,
                 tagId = s.activeTagId
             )
@@ -228,6 +293,7 @@ class TimerEngine @Inject constructor(
                     pomodorosCompletedInRound = newPomodoros
                 )
             }
+            scope.launch { snapshotStore.clear() }
             _events.tryEmit(
                 TimerEvent.RoundCompleted(
                     profileId = s.profile.id,
@@ -245,24 +311,51 @@ class TimerEngine @Inject constructor(
             )
         }
         if (completedPhase.autoAdvance) {
+            adjustTotalSeconds = 0
             beginPhase(nextIndex, s.profile)
         } else {
+            adjustTotalSeconds = 0
             _state.update {
                 it.copy(
                     status = TimerStatus.PAUSED,
                     remainingSeconds = nextPhase.durationSeconds
                 )
             }
+            persistSnapshot()
         }
+    }
+
+    private fun persistSnapshot() {
+        val s = _state.value
+        if (s.status == TimerStatus.IDLE || s.status == TimerStatus.FINISHED) {
+            scope.launch { snapshotStore.clear() }
+            return
+        }
+        val snapshot = TimerSnapshot(
+            profileId = s.profile.id,
+            phaseIndex = s.phaseIndex,
+            status = s.status.name,
+            remainingSeconds = s.remainingSeconds,
+            phaseEndsAtEpochMs = s.phaseEndsAtEpochMs,
+            totalSecondsInPhase = s.totalSecondsInPhase,
+            adjustTotalSeconds = adjustTotalSeconds,
+            pomodorosCompletedInRound = s.pomodorosCompletedInRound,
+            activeTagId = s.activeTagId,
+            sessionStartedAtEpochMs = s.sessionStartedAtEpochMs,
+            savedAtNowMs = ticker.nowMs(),
+            savedAtWallClockMs = System.currentTimeMillis()
+        )
+        scope.launch { snapshotStore.save(snapshot) }
     }
 
     private fun resetInternal() {
         stopTickerLoop()
-        actualElapsedInPhase = 0
+        adjustTotalSeconds = 0
         phaseStartedAtMs = 0
     }
 
     companion object {
         const val TICK_INTERVAL_MS = 250L
+        private const val REBOOT_TOLERANCE_MS = 10L * 60 * 1000
     }
 }
