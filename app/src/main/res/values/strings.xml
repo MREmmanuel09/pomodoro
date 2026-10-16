@@ -125,7 +125,14 @@
     <string name="settings_export">Exportar datos (JSON)</string>
     <string name="settings_import">Importar datos (JSON)</string>
     <string name="settings_sound_credits">Créditos de sonidos</string>
+    <string name="settings_check_updates">Buscar actualizaciones</string>
     <string name="settings_close">Cerrar</string>
+    <string name="update_available_title">Nueva versión disponible</string>
+    <string name="update_available_message">La versión %1$s ya está lista. Descárgala e instálala encima de la actual para conservar tus datos y permisos.</string>
+    <string name="update_download">Descargar</string>
+    <string name="update_later">Ahora no</string>
+    <string name="update_up_to_date">Ya tienes la última versión</string>
+    <string name="update_check_error">No se pudo verificar la actualización</string>
     <string name="sound_credits_message">Sonidos ambientales de Pixabay:\n\n• Lluvia — Franco Gonzalez\n• Olas — Stereogenic Studio\n• Bosque — Paweł Spychała\n\nBajo la Content License de Pixabay. Crédito agradecido a los autores en pixabay.com.</string>
     <string name="export_success">Datos exportados</string>
     <string name="import_success">Datos importados</string>

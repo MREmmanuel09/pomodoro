@@ -53,6 +53,7 @@ class PomodoroDataStore @Inject constructor(
         val AMBIENT_SOUNDS = booleanPreferencesKey("ambient_sounds_enabled")
         val AMBIENT_SOUND_NAME = stringPreferencesKey("ambient_sound_name")
         val LANGUAGE = stringPreferencesKey("language")
+        val DISMISSED_UPDATE = stringPreferencesKey("dismissed_update_version")
         val PROFILES_JSON = stringPreferencesKey("profiles_json")
         val PLANT_JSON = stringPreferencesKey("plant_json")
         val TIMER_SNAPSHOT_JSON = stringPreferencesKey("timer_snapshot_json")
@@ -143,7 +144,8 @@ class PomodoroDataStore @Inject constructor(
         strictModeEnabled = this[Keys.STRICT_MODE] ?: false,
         ambientSoundsEnabled = this[Keys.AMBIENT_SOUNDS] ?: false,
         ambientSoundName = this[Keys.AMBIENT_SOUND_NAME] ?: "rain",
-        language = this[Keys.LANGUAGE]?.let { runCatching { AppLanguage.valueOf(it) }.getOrNull() } ?: AppLanguage.SYSTEM
+        language = this[Keys.LANGUAGE]?.let { runCatching { AppLanguage.valueOf(it) }.getOrNull() } ?: AppLanguage.SYSTEM,
+        dismissedUpdateVersion = this[Keys.DISMISSED_UPDATE] ?: ""
     )
 
     private fun AppSettings.writeTo(prefs: MutablePreferences) {
@@ -165,6 +167,7 @@ class PomodoroDataStore @Inject constructor(
         prefs[Keys.AMBIENT_SOUNDS] = ambientSoundsEnabled
         prefs[Keys.AMBIENT_SOUND_NAME] = ambientSoundName
         prefs[Keys.LANGUAGE] = language.name
+        prefs[Keys.DISMISSED_UPDATE] = dismissedUpdateVersion
     }
 
     companion object {

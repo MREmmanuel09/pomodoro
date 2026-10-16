@@ -2,6 +2,7 @@ package com.emman.pomodoro.ui.settings
 
 import android.app.Activity
 import android.net.Uri
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -38,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,6 +62,8 @@ import com.emman.pomodoro.domain.model.AppLanguage
 import com.emman.pomodoro.domain.model.ClockStyle
 import com.emman.pomodoro.domain.model.ThemeMode
 import com.emman.pomodoro.domain.model.TimerTextScale
+import com.emman.pomodoro.ui.update.ManualCheckResult
+import com.emman.pomodoro.ui.update.UpdateViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -80,6 +84,22 @@ fun SettingsScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var showCredits by remember { mutableStateOf(false) }
+    val activity = context as? ComponentActivity
+    val updateViewModel: UpdateViewModel =
+        if (activity != null) hiltViewModel(activity) else hiltViewModel()
+    val upToDateMessage = stringResource(R.string.update_up_to_date)
+    val updateErrorMessage = stringResource(R.string.update_check_error)
+
+    LaunchedEffect(updateViewModel) {
+        updateViewModel.manualResult.collect { result ->
+            snackbarHostState.showSnackbar(
+                when (result) {
+                    ManualCheckResult.UP_TO_DATE -> upToDateMessage
+                    ManualCheckResult.ERROR -> updateErrorMessage
+                }
+            )
+        }
+    }
     val exportMessage = stringResource(R.string.export_success)
     val importMessage = stringResource(R.string.import_success)
     val importErrorMessage = stringResource(R.string.import_error)
@@ -297,6 +317,10 @@ fun SettingsScreen(
                     NavRow(
                         title = stringResource(R.string.settings_sound_credits),
                         onClick = { showCredits = true }
+                    )
+                    NavRow(
+                        title = stringResource(R.string.settings_check_updates),
+                        onClick = updateViewModel::checkNow
                     )
                 }
             }

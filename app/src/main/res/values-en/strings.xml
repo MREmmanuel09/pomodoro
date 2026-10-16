@@ -125,7 +125,14 @@
     <string name="settings_export">Export data (JSON)</string>
     <string name="settings_import">Import data (JSON)</string>
     <string name="settings_sound_credits">Sound credits</string>
+    <string name="settings_check_updates">Check for updates</string>
     <string name="settings_close">Close</string>
+    <string name="update_available_title">New version available</string>
+    <string name="update_available_message">Version %1$s is ready. Download and install it over the current one to keep your data and permissions.</string>
+    <string name="update_download">Download</string>
+    <string name="update_later">Not now</string>
+    <string name="update_up_to_date">You\'re on the latest version</string>
+    <string name="update_check_error">Couldn\'t check for updates</string>
     <string name="sound_credits_message">Ambient sounds from Pixabay:\n\n• Rain — Franco Gonzalez\n• Waves — Stereogenic Studio\n• Forest — Paweł Spychała\n\nUnder the Pixabay Content License. Credit appreciated to the authors at pixabay.com.</string>
     <string name="export_success">Data exported</string>
     <string name="import_success">Data imported</string>

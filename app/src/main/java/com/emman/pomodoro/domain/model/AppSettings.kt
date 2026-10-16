@@ -31,5 +31,6 @@ data class AppSettings(
     val strictModeEnabled: Boolean = false,
     val ambientSoundsEnabled: Boolean = false,
     val ambientSoundName: String = "rain",
-    val language: AppLanguage = AppLanguage.SYSTEM
+    val language: AppLanguage = AppLanguage.SYSTEM,
+    val dismissedUpdateVersion: String = ""
 )

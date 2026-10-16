@@ -38,7 +38,7 @@ También puedes buscar en el aviso la opción **"Instalar de todos modos"** (a v
 
 ### Paso 3 — Verifica la descarga
 
-El archivo debe pesar **~3.11 MB**. Si pesa mucho menos (o se ve como "página web"), la descarga se corrompió: bórralo y vuelve a descargarlo desde la página de Releases, tocando directamente **app-release.apk**.
+El archivo debe pesar **~42 MB**. Si pesa mucho menos (o se ve como "página web"), la descarga se corrompió: bórralo y vuelve a descargarlo desde la página de Releases, tocando directamente **app-release.apk**.
 
 ### En Xiaomi/POCO (HyperOS) no instala
 
@@ -49,13 +49,19 @@ Si después de lo anterior sigue fallando:
 3. Toca **"Restablecer valores predeterminados" 4 veces seguidas** (desactiva la optimización del sistema)
 4. Reinicia el teléfono e intenta de nuevo
 
+## Cómo actualizar
+
+**No hace falta desinstalar la versión anterior.** Descarga el APK nuevo y tócalo: el instalador mostrará **"Actualizar"** y conservará todos tus datos, ajustes y permisos.
+
+Además, la app revisa GitHub al abrirse: si hay una versión nueva te muestra un aviso con un botón **Descargar**. También puedes comprobarlo a mano en Ajustes → Gestión → **Buscar actualizaciones**.
+
 ## Funciones
 
 - **Temporizador** con perfiles personalizables (clásico 25/5, 50/10, 90/20) y fases auto-avance
 - **Estadísticas**: gráfico de 30 días, racha actual/récord, distribución por etiqueta
 - **Planta** que crece con tus pomodoros y se marchita si la descuidas (opcional)
 - **Etiquetas** por proyecto con colores (opcional)
-- **Sonidos ambientales**: lluvia, olas, bosque — sintetizados, sin archivos (opcional)
+- **Sonidos ambientales**: lluvia, olas y bosque (grabaciones reales de Pixabay, opcional)
 - **Modo estricto**: oculta el botón de saltear fase (opcional)
 - **Notificaciones y vibración** al terminar cada fase o alcanzar la meta diaria
 - **Apariencia**: tema claro/oscuro/sistema, colores dinámicos (Android 12+), 5 paletas, 4 estilos de reloj

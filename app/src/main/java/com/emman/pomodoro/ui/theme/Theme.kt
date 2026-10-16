@@ -2,6 +2,7 @@ package com.emman.pomodoro.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -12,6 +13,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.emman.pomodoro.domain.model.AccentPalette
 import com.emman.pomodoro.domain.model.ThemeMode
+
+private fun ColorScheme.asOledDark(): ColorScheme = copy(
+    background = Color.Black,
+    surface = Color.Black,
+    surfaceDim = Color.Black,
+    surfaceBright = Color(0xFF2A2A2A),
+    surfaceContainerLowest = Color.Black,
+    surfaceContainerLow = OledSurfaceLow,
+    surfaceContainer = OledSurface,
+    surfaceContainerHigh = OledDialogSurface,
+    surfaceContainerHighest = OledSurface
+)
 
 private fun schemeFor(palette: AccentPalette, dark: Boolean) = when (palette) {
     AccentPalette.TOMATO -> if (dark) {
@@ -62,9 +75,16 @@ fun PomodoroTheme(
     val colorScheme = when {
         useDynamic -> {
             val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            if (darkTheme) {
+                dynamicDarkColorScheme(context).asOledDark()
+            } else {
+                dynamicLightColorScheme(context)
+            }
         }
-        else -> schemeFor(accentPalette, darkTheme)
+        else -> {
+            val scheme = schemeFor(accentPalette, darkTheme)
+            if (darkTheme) scheme.asOledDark() else scheme
+        }
     }
 
     MaterialTheme(

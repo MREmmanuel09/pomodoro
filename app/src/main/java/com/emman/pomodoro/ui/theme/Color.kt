@@ -17,8 +17,12 @@ val BreakBlue80 = Color(0xFF90CAF9)
 val BreakBlueGrey40 = Color(0xFF4F6379)
 val BreakBlueGrey80 = Color(0xFFBEC7DC)
 
-val NeutralDark = Color(0xFF1C1B1F)
+val NeutralDark = Color(0xFF000000)
 val NeutralLight = Color(0xFFFDF7F5)
+
+val OledSurfaceLow = Color(0xFF080808)
+val OledSurface = Color(0xFF0D0D0D)
+val OledDialogSurface = Color(0xFF161616)
 
 val Forest40 = Color(0xFF2E7D32)
 val Forest80 = Color(0xFFA5D6A7)

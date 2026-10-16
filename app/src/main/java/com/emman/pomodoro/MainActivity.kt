@@ -2,7 +2,9 @@ package com.emman.pomodoro
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -14,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
@@ -25,6 +28,8 @@ import com.emman.pomodoro.domain.model.AppSettings
 import com.emman.pomodoro.domain.repository.SettingsRepository
 import com.emman.pomodoro.ui.navigation.PomodoroNavGraph
 import com.emman.pomodoro.ui.theme.PomodoroTheme
+import com.emman.pomodoro.ui.update.UpdateDialog
+import com.emman.pomodoro.ui.update.UpdateViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -57,7 +62,10 @@ class MainActivity : ComponentActivity() {
         requestNotificationPermissionIfNeeded()
         setContent {
             val viewModel: ThemeViewModel = hiltViewModel()
+            val updateViewModel: UpdateViewModel = hiltViewModel()
             val settings by viewModel.settings.collectAsStateWithLifecycle()
+            val update by updateViewModel.update.collectAsStateWithLifecycle()
+            val context = LocalContext.current
             PomodoroTheme(
                 themeMode = settings.themeMode,
                 dynamicColor = settings.dynamicColor,
@@ -69,6 +77,22 @@ class MainActivity : ComponentActivity() {
                 ) {
                     PomodoroNavGraph()
                 }
+            }
+            update?.let { info ->
+                UpdateDialog(
+                    info = info,
+                    onDownload = {
+                        val url = info.apkUrl ?: info.releaseUrl
+                        runCatching {
+                            context.startActivity(
+                                Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            )
+                        }
+                        updateViewModel.hide()
+                    },
+                    onDismiss = updateViewModel::dismiss
+                )
             }
         }
     }
